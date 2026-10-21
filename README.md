@@ -30,3 +30,12 @@ python app.py                # open http://127.0.0.1:5000
 Add accuracy and `confusion_matrix.png` here.
 
 Learning project only. Not 100% accurate. Never click unknown links.
+
+open http://127.0.0.1:5000/
+safe email sample detection 
+<img width="1758" height="988" alt="Screenshot 2026-10-21 150935" src="https://github.com/user-attachments/assets/d1bb3c46-f7ce-4e86-bcf1-4b7a1ef3c31b" />
+<img width="1737" height="956" alt="Screenshot 2026-10-21 150943" src="https://github.com/user-attachments/assets/291f1c6b-9277-4b6f-8fe4-eff1d0dbc59c" />
+phishing mail sample detection
+<img width="1567" height="986" alt="Screenshot 2026-10-21 150952" src="https://github.com/user-attachments/assets/c35bdf24-d1c9-4dd4-97cf-4e59bbce2f29" />
+<img width="1466" height="898" alt="Screenshot 2026-10-21 150959" src="https://github.com/user-attachments/assets/9a3b3f58-bc7b-47e6-b994-0976d9c484cf" />
+
