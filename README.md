@@ -32,6 +32,10 @@ Add accuracy and `confusion_matrix.png` here.
 Learning project only. Not 100% accurate. Never click unknown links.
 
 open http://127.0.0.1:5000/
+
+using this ip we can open our website
+
+
 safe email sample detection 
 <img width="1758" height="988" alt="Screenshot 2026-10-21 150935" src="https://github.com/user-attachments/assets/d1bb3c46-f7ce-4e86-bcf1-4b7a1ef3c31b" />
 <img width="1737" height="956" alt="Screenshot 2026-10-21 150943" src="https://github.com/user-attachments/assets/291f1c6b-9277-4b6f-8fe4-eff1d0dbc59c" />
