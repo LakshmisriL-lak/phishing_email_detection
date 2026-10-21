@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PhishGuard: Phishing Email Detector</title>
+<style>
+:root{--bg:#eef3f7;--card:#fff;--ink:#0f2233;--mute:#5a6e80;--line:#d8e2ea;--navy:#0a2540;--navy2:#123a63;--acc:#0e9aa7;--accbg:#e2f5f6;--bad:#c62828;--badbg:#fdecea;--ok:#12805c;--okbg:#e3f6ee;--warn:#b86e00;--warnbg:#fff2dc;--mark:#fff0b3;--shadow:0 6px 24px rgba(10,37,64,.08);box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0a141d;--card:#121f2b;--ink:#e7eef4;--mute:#97aab9;--line:#25384a;--acc:#35c3d1;--accbg:#12323a;--bad:#ff8a80;--badbg:#3a1d1f;--ok:#6fd8a6;--okbg:#14302a;--warn:#f4c15d;--warnbg:#38290c;--mark:#5a4a10;--shadow:none}}
+:root[data-theme="dark"]{--bg:#0a141d;--card:#121f2b;--ink:#e7eef4;--mute:#97aab9;--line:#25384a;--acc:#35c3d1;--accbg:#12323a;--bad:#ff8a80;--badbg:#3a1d1f;--ok:#6fd8a6;--okbg:#14302a;--warn:#f4c15d;--warnbg:#38290c;--mark:#5a4a10;--shadow:none}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{background:linear-gradient(135deg,var(--navy),var(--navy2) 60%,#0d6f86);color:#fff;padding:34px 18px 70px}
+.wrap{max-width:1040px;margin:0 auto}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:1.05rem}
+.brand svg{width:30px;height:30px}
+#theme{background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:999px;padding:6px 14px;font-size:.85rem;cursor:pointer}
+h1{font-size:clamp(1.8rem,4.5vw,2.8rem);line-height:1.1;margin:30px 0 10px;letter-spacing:-.02em;max-width:18ch}
+.lead{margin:0 0 18px;max-width:58ch;color:#c9dbe8}
+.pills{display:flex;flex-wrap:wrap;gap:8px}
+.pills span{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);padding:5px 12px;border-radius:999px;font-size:.85rem}
+main{max-width:1040px;margin:-44px auto 0;padding:0 18px 50px}
+.grid{display:grid;grid-template-columns:1fr;gap:18px}
+@media (min-width:900px){.grid{grid-template-columns:5fr 6fr;align-items:start}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:var(--shadow)}
+.card h2{font-size:1.05rem;margin:0 0 12px}
+.note{background:var(--warnbg);color:var(--warn);border-radius:10px;padding:9px 12px;font-size:.85rem;margin-bottom:14px}
+textarea{width:100%;min-height:210px;padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--ink);font:inherit;resize:vertical}
+textarea:focus,button:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+button{font:inherit;border-radius:10px;padding:10px 16px;cursor:pointer;border:1px solid var(--line);background:var(--card);color:var(--ink)}
+button.main{background:linear-gradient(135deg,var(--navy2),var(--acc));color:#fff;border:0;font-weight:700;padding:11px 24px}
+.hint{color:var(--mute);font-size:.85rem}
+.empty{color:var(--mute);text-align:center;padding:50px 10px}
+.empty svg{width:56px;height:56px;opacity:.5}
+.head{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.gauge{width:210px;flex:none;text-align:center}
+.gauge svg{width:100%;display:block}
+.gauge .t{fill:none;stroke:var(--line);stroke-width:16;stroke-linecap:round}
+.gauge .f{fill:none;stroke-width:16;stroke-linecap:round;stroke-dasharray:251.3;stroke-dashoffset:251.3;transition:stroke-dashoffset .9s ease,stroke .3s}
+.gauge .n{font-size:30px;font-weight:800;fill:var(--ink)}
+.gauge .l{font-size:10px;fill:var(--mute)}
+.verd{flex:1;min-width:190px}
+.verd .v{font-size:1.9rem;font-weight:800;line-height:1.1}
+.badge{display:inline-block;margin-top:8px;border-radius:999px;padding:4px 14px;font-weight:700;font-size:.9rem}
+.HIGH{background:var(--badbg);color:var(--bad)}.MEDIUM{background:var(--warnbg);color:var(--warn)}.LOW{background:var(--okbg);color:var(--ok)}
+.verd p{margin:8px 0 0;color:var(--mute);font-size:.92rem}
+.split{display:flex;height:12px;border-radius:8px;overflow:hidden;margin:18px 0 10px;background:var(--line)}
+.split i{display:block;height:100%;transition:width .8s}
+.sf{background:var(--ok)}.ph{background:var(--bad)}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tile{border-radius:12px;padding:10px 14px}.tile b{display:block;font-size:1.6rem;line-height:1.1}.tile span{font-size:.85rem}
+.tile.s{background:var(--okbg);color:var(--ok)}.tile.p{background:var(--badbg);color:var(--bad)}
+.sec{margin-top:20px}.sec h3{font-size:.98rem;margin:0 0 8px}
+.pre{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:12px;white-space:pre-wrap;word-break:break-word;font-size:.92rem;max-height:190px;overflow:auto}
+mark{background:var(--mark);color:inherit;border-radius:4px;padding:0 3px}
+.u{color:var(--bad);text-decoration:underline;font-weight:600}
+ul.flags,ul.adv{list-style:none;margin:0;padding:0}
+ul.flags li{padding:8px 12px;margin:6px 0;border-radius:8px;background:var(--badbg);color:var(--ink);border-left:4px solid var(--bad);font-size:.93rem}
+ul.flags li.none{background:var(--okbg);border-color:var(--ok)}
+.advice{border-radius:12px;padding:4px 16px 12px;border-left:6px solid}
+.advice.HIGH{border-color:var(--bad)}.advice.MEDIUM{border-color:var(--warn)}.advice.LOW{border-color:var(--ok)}
+ul.adv li{padding:7px 0 7px 26px;position:relative;font-size:.94rem}
+ul.adv li:before{content:"\2713";position:absolute;left:0;font-weight:800;color:var(--acc)}
+code{display:block;overflow-x:auto;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin:6px 0;font-size:.82rem;white-space:nowrap}
+.hist{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:.88rem}
+.hist:last-child{border:0}.hist em{font-style:normal;font-weight:700}
+.check{display:grid;grid-template-columns:1fr;gap:6px;font-size:.92rem}
+@media (min-width:640px){.check{grid-template-columns:1fr 1fr}}
+.check div{background:var(--accbg);border-radius:10px;padding:10px 12px}
+footer{margin-top:26px;color:var(--mute);font-size:.82rem;text-align:center}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+<div class="top"><div class="brand"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 2 4 7v8c0 7.5 5 13 12 15 7-2 12-7.500 12-15V7z" fill="#35c3d1"/><path d="m10.500 16 4 4 7-8" fill="none" stroke="#0a2540" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>PhishGuard</div>
+<button id="theme" type="button">Switch theme</button></div>
+<h1>Is this email safe to open?</h1>
+<p class="lead">Paste any email. PhishGuard scans the text, links and keywords, shows a risk score, and tells you what to do next.</p>
+<div class="pills"><span>Text analysis</span><span>Link check</span><span>Keyword scan</span><span>Safety advice</span></div>
+</div></header>
+
+<main><div class="grid">
+<section class="card">
+<h2>Paste your email</h2>
+<div class="note">Your email is sent to the Python backend and checked by the trained Scikit-learn model.</div>
+<textarea id="mail" aria-label="Email content" placeholder="Paste the email subject and body here..."></textarea>
+<div class="row">
+<button class="main" id="check" type="button">Check email</button>
+<button id="ex1" type="button">Phishing example</button>
+<button id="ex2" type="button">Safe example</button>
+<button id="clear" type="button">Clear</button>
+</div>
+<div class="sec" id="histBox" hidden><h3>Recent checks</h3><div id="hist"></div></div>
+</section>
+
+<section class="card" aria-live="polite">
+<div id="empty" class="empty"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 2 4 7v8c0 7.500 5 13 12 15 7-2 12-7.500 12-15V7z" fill="none" stroke="currentColor" stroke-width="2"/></svg><p>Your result will show here.<br>Try one of the examples to see how it works.</p></div>
+<div id="res" hidden>
+<div class="head">
+<div class="gauge"><svg viewBox="0 0 200 120" role="img" aria-label="Phishing score gauge"><path class="t" d="M20 100A80 80 0 0 1 180 100"/><path class="f" id="arc" d="M20 100A80 80 0 0 1 180 100"/><text class="n" id="gnum" x="100" y="92" text-anchor="middle">0%</text><text class="l" x="100" y="112" text-anchor="middle">phishing score</text></svg></div>
+<div class="verd"><div class="v" id="vtext"></div><span class="badge" id="badge"></span><p id="vnote"></p></div>
+</div>
+<div class="split"><i class="sf" id="sf"></i><i class="ph" id="ph"></i></div>
+<div class="tiles"><div class="tile s"><b id="sN"></b><span>Safe</span></div><div class="tile p"><b id="pN"></b><span>Phishing</span></div></div>
+
+<div class="sec"><h3>Your email, with warning signs marked</h3><div class="pre" id="pre"></div></div>
+<div class="sec"><h3>Why this result?</h3><ul class="flags" id="flags"></ul></div>
+<div class="sec advice" id="advBox"><h3 style="margin-top:12px">What should you do?</h3><ul class="adv" id="adv"></ul></div>
+<div class="sec" id="linkBox" hidden><h3>Links found (do not click)</h3><div id="links"></div></div>
+<div class="row"><button id="copy" type="button">Copy report</button></div>
+</div>
+</section>
+</div>
+
+<section class="card" style="margin-top:18px">
+<h2>Quick safety checklist</h2>
+<div class="check">
+<div>Check the sender’s full email address, not only the name.</div>
+<div>Hover over a link to see where it really goes.</div>
+<div>Banks never ask for passwords or OTP by email.</div>
+<div>Be careful with urgent threats like “account suspended”.</div>
+<div>Type the official website yourself instead of clicking.</div>
+<div>Report phishing in India at cybercrime.gov.in or call 1930.</div>
+</div>
+</section>
+<footer>Learning project. Results are not 100% accurate. Never click unknown links.</footer>
+</main>
+
+<script>
+var KEYWORDS=["urgent","verify","password","click here","bank","suspended","account","login","confirm","winner","free"];
+var URL_RE=/https?:\/\/\S+|www\.\S+/gi;
+var IP_RE=/https?:\/\/\d{1,3}(?:\.\d{1,3}){3}/i;
+var SHORT=["bit.ly","tinyurl.com","goo.gl","t.co","ow.ly","is.gd","cutt.ly"];
+var KW_RE=new RegExp("("+KEYWORDS.join("|")+")","gi");
+var EX1="Dear customer,\n\nYour account has been suspended! Verify your password immediately or it will be closed.\nClick here: http://192.168.1.5/secure-login-bank\n\nBank Security Team";
+var EX2="Hi team,\n\nThe weekly meeting is moved to Thursday 3 PM. The agenda is in the shared folder.\nSee you there,\nPriya";
+var history=[],lastReport="";
+function $(id){return document.getElementById(id)}
+function esc(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}
+function highlight(text){
+  var out="",last=0,m;URL_RE.lastIndex=0;
+  function plain(seg){return esc(seg).replace(KW_RE,"<mark>$1</mark>")}
+  while((m=URL_RE.exec(text))){out+=plain(text.slice(last,m.index))+"<span class='u'>"+esc(m[0])+"</span>";last=m.index+m[0].length}
+  return out+plain(text.slice(last));
+}
+function fill(ul,items,cls){ul.innerHTML="";items.forEach(function(x){var li=document.createElement("li");li.textContent=x;if(cls)li.className=cls;ul.appendChild(li)})}
+async function run(){
+  var text=$("mail").value.trim();
+  if(!text){$("mail").focus();return}
+  var data;
+  try{
+    var resp=await fetch("/api/check",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text:text})});
+    data=await resp.json();
+    if(!resp.ok)throw new Error(data.error||"Server error");
+  }catch(e){alert("Could not check the email: "+e.message);return}
+  var r={p:data.phishing_percent,flags:data.flags,urls:data.urls},bad=data.label==="Phishing",risk=data.risk,col=bad?"var(--bad)":risk==="MEDIUM"?"var(--warn)":"var(--ok)";
+  $("empty").hidden=true;$("res").hidden=false;
+  var arc=$("arc");arc.style.stroke=col;arc.style.strokeDashoffset=251.3;
+  setTimeout(function(){arc.style.strokeDashoffset=251.3*(1-r.p/100)},30);
+  $("gnum").textContent=r.p+"%";
+  var v=$("vtext");v.textContent=bad?"Phishing":"Safe";v.style.color=col;
+  var b=$("badge");b.textContent="Risk level: "+risk;b.className="badge "+risk;
+  $("vnote").textContent=risk==="HIGH"?"Treat this email as dangerous.":risk==="MEDIUM"?"Something looks off. Check before you act.":"Nothing alarming found, but stay careful.";
+  $("sf").style.width=(100-r.p)+"%";$("ph").style.width=r.p+"%";
+  $("sN").textContent=(100-r.p)+"%";$("pN").textContent=r.p+"%";
+  $("pre").innerHTML=highlight(text);
+  fill($("flags"),r.flags.length?r.flags:["No obvious red flags found (no suspicious keywords or links)."],r.flags.length?"":"none");
+  var ad=data.advice;fill($("adv"),ad);$("advBox").className="sec advice "+risk;
+  var lb=$("links");lb.innerHTML="";r.urls.forEach(function(u){var c=document.createElement("code");c.textContent=u;lb.appendChild(c)});
+  $("linkBox").hidden=!r.urls.length;
+  lastReport="PhishGuard report\nResult: "+(bad?"Phishing":"Safe")+" ("+r.p+"% phishing, "+(100-r.p)+"% safe)\nRisk level: "+risk+"\n\nWhy:\n- "+(r.flags.join("\n- ")||"No red flags")+"\n\nAdvice:\n- "+ad.join("\n- ");
+  history.unshift({v:bad?"Phishing":"Safe",p:r.p,risk:risk,s:text.replace(/\s+/g," ").slice(0,34)});history=history.slice(0,5);
+  var h=$("hist");h.innerHTML="";history.forEach(function(x){var d=document.createElement("div");d.className="hist";var a=document.createElement("span");a.textContent=x.s+"...";var e=document.createElement("em");e.textContent=x.v+" "+x.p+"%";e.style.color=x.risk==="LOW"?"var(--ok)":x.risk==="MEDIUM"?"var(--warn)":"var(--bad)";d.appendChild(a);d.appendChild(e);h.appendChild(d)});
+  $("histBox").hidden=false;
+  if(window.innerWidth<900)$("res").scrollIntoView({behavior:"smooth"});
+}
+$("check").onclick=run;
+$("ex1").onclick=function(){$("mail").value=EX1;run()};
+$("ex2").onclick=function(){$("mail").value=EX2;run()};
+$("clear").onclick=function(){$("mail").value="";$("res").hidden=true;$("empty").hidden=false};
+$("copy").onclick=function(){
+  var btn=$("copy");
+  function done(m){btn.textContent=m;setTimeout(function(){btn.textContent="Copy report"},1800)}
+  try{navigator.clipboard.writeText(lastReport).then(function(){done("Copied")},function(){done("Copy not allowed")})}catch(e){done("Copy not allowed")}
+};
+$("theme").onclick=function(){
+  var d=document.documentElement,dark=d.getAttribute("data-theme")?d.getAttribute("data-theme")==="dark":window.matchMedia("(prefers-color-scheme: dark)").matches;
+  d.setAttribute("data-theme",dark?"light":"dark");
+};
+</script>
+</body>
+</html>
